@@ -1,0 +1,133 @@
+npm init --y
+npm i express --save
+npm i cors dotenv multer -S(carga de archivos)
+
+crear el .gitignore
+crear archivo .env.example (variables de entorno)
+(no se suben al repo, se ponen en el gitignore)
+
+por ahora se usó .env para las variables de el entorno y luego se usa: require("dotenv").config() para indicarle al sistema que haga uso de variables de el entorno
+
+
+SCAFFOLD:
+- controllers
+- models
+- routes (vistas)
+
+- config (para config de bases de datos y demás)
+- utils (funciones helpers: minusculas-mayusc y así)
+- storage (pdfs y archivos)
+
+- comando git init
+
+------------------------------------------------------------------------------------
+
+npm install express mongoose --save
+npm install mongodb
+
+hagamos la conexión a las BD mongo
+creamos un mongo.js en config(folder):
+
+***OPCION 1
+const mongoose = require("mongoose")
+
+const dbConnect = () => {
+    try {
+        const DB_URI = process.env.DB_URI;
+        mongoose.connect(DB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log('*** Conexión exitosa a la base de datos ***');
+    } catch (error) {
+        console.error('Error al conectar a la base de datos:', error.message);
+    }
+}
+module.exports = dbConnect;
+
+
+***OPCION 2 (escogida)
+const {connect} = require("mongoose");
+
+async function connectionDb(){
+
+    try {
+        const DB_URI = process.env.DB_URI;
+        await connect(DB_URI, {
+
+        });
+        console.log('*** Conexión exitosa a la base de datos ***');
+    } catch (error) {
+        console.error('Error al conectar a la base de datos:', error.message);
+    }
+}
+module.exports = connectionDb;
+
+
+en .env debe estar la URI de la base de datos
+
+luego en app.js se debe importar: const dbConnection = require('./config/mongo')
+y luego en el mismo app.js se invoca:
+
+require("dotenv").config()
+const express = require("express")
+const cors = require("cors")
+const connectionDb = require('./config/mongo')
+const app = express()
+
+// Esto permite que el servidor responda a solicitudes HTTP desde diferentes dominios.
+// función que tiene acceso tanto al objeto de solicitud (request) como al objeto de respuesta (response)
+app.use(cors())
+
+const port = process.env.PORT || 3000
+
+connectionDb().then(() => {})
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port} -> http://localhost:${port}`)})
+
+
+
+------------------------------------------------------------------------------------
+
+ahora en models creamos un folder "nosql" y dentro de él van  los files de models que son
+users.js storage.js tracks.js:
+
+
+users.js:
+const mongoose = require('mongoose');
+
+const UserScheme = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        password: {
+            type: String,
+            required: true
+        },
+        role: {
+            type: ["user", "admin"],
+            required: true,
+            default: 'user'
+        }
+    }
+);
+
+module.exports = mongoose.model('Usuarios', UserScheme);
+
+hacemos los modelos para los demás
+storage.js
+tracks.js
+
+
+
+
+
+
